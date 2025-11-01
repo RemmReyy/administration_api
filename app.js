@@ -4,8 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const salesmenRouter = require('./routes/salesmen');
+const performanceRouter = require('./routes/performance');
 
 var app = express();
 
@@ -19,8 +19,21 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/salesmen', salesmenRouter);
+app.use('/api/performance', performanceRouter);
+
+app.get('/', (req, res) => {
+    res.send(`
+    <h1>REST API — interface for the administration of salesmen and social performance records</h1>
+    <ul>
+      <li><a href="/api/salesmen">GET /api/salesmen</a></li>
+      <li><a href="/api/salesmen/1">GET /api/salesmen/1</a></li>
+      <li><a href="/api/performance">GET /api/performance</a></li>
+      <li><a href="/api/performance/salesman/1">GET /api/performance/salesman/1</a></li>
+      <li><a href="/api/performance/salesman/1/year/2025">GET /api/performance/salesman/1/year/2025</a></li>
+    </ul>
+  `);
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
