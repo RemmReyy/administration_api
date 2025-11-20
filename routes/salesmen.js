@@ -1,51 +1,79 @@
 const express = require('express');
 const router = express.Router();
-const { salesmen } = require('../data/salesmen');
-const { records } = require('../data/performance');
+const { getDb } = require('../data/db');
+
+const getCollection = () => getDb().collection('Salesmen');
+const getPerformanceCollection = () => getDb().collection('SocialPerformanceRecord');
 
 // GET /api/salesmen → readAllSalesMen()
-router.get('/', (req, res) => {
-    res.json(salesmen);
+router.get('/', async (req, res) => {
+    try {
+        const salesmen = await getCollection().find({}).project({ _id: 0 }).toArray();
+        res.json(salesmen);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // GET /api/salesmen/:sid → readSalesMan(sid)
-router.get('/:sid', (req, res) => {
-    const sid = parseInt(req.params.sid);
-    const salesman = salesmen.find(s => s.sid === sid);
-    if (!salesman) return res.status(404).json({ error: 'Salesman not found' });
-    res.json(salesman);
+router.get('/:sid', async (req, res) => {
+    try {
+        const sid = parseInt(req.params.sid);
+        const salesman = await getCollection().findOne({ sid: sid }, { projection: { _id: 0 } });
+
+        if (!salesman) return res.status(404).json({ error: 'Salesman not found' });
+        res.json(salesman);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // POST /api/salesmen → createSalesMan
-router.post('/', (req, res) => {
-    const { firstname, lastname, sid } = req.body;
-    if (!firstname || !lastname || !sid) {
-        return res.status(400).json({ error: 'firstname, lastname, sid required' });
-    }
-    if (salesmen.some(s => s.sid === sid)) {
-        return res.status(400).json({ error: 'sid already exists' });
-    }
+router.post('/', async (req, res) => {
+    try {
+        const { firstname, lastname, sid } = req.body;
+        if (!firstname || !lastname || !sid) {
+            return res.status(400).json({ error: 'firstname, lastname, sid required' });
+        }
 
-    const newSalesman = { firstname, lastname, sid };
-    salesmen.push(newSalesman);
-    res.status(201).json(newSalesman);
+        const collection = getCollection();
+        const existing = await collection.findOne({ sid: parseInt(sid) });
+
+        if (existing) {
+            return res.status(400).json({ error: 'sid already exists' });
+        }
+
+        const newSalesman = {
+            firstname,
+            lastname,
+            sid: parseInt(sid)
+        };
+
+        await collection.insertOne(newSalesman);
+        res.status(201).json(newSalesman);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // DELETE /api/salesmen/:sid → deleteSalesMan(sid)
-router.delete('/:sid', (req, res) => {
-    const sid = parseInt(req.params.sid);
-    const index = salesmen.findIndex(s => s.sid === sid);
-    if (index === -1) return res.status(404).json({ error: 'Salesman not found' });
+router.delete('/:sid', async (req, res) => {
+    try {
+        const sid = parseInt(req.params.sid);
+        const collection = getCollection();
 
-    // delete all records
-    for (let i = records.length - 1; i >= 0; i--) {
-        if (records[i].goalId === sid) {
-            records.splice(i, 1);
+        const result = await collection.deleteOne({ sid: sid });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'Salesman not found' });
         }
-    }
 
-    salesmen.splice(index, 1);
-    res.status(204).send();
+        await getPerformanceCollection().deleteMany({ goalId: sid });
+
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;

@@ -1,70 +1,125 @@
-// routes/performance.js
 const express = require('express');
 const router = express.Router();
-const { records } = require('../data/performance');
-const { salesmen } = require('../data/salesmen');
+const { getDb } = require('../data/db');
+
+const getSalesmenCollection = () => getDb().collection('Salesmen');
+const getCollection = () => getDb().collection('SocialPerformanceRecord');
 
 // POST /api/performance → addSocialPerformanceRecord
-router.post('/', (req, res) => {
-    const { goalId, goalDescription, valueSupervisor, valuePeerGroup, year } = req.body;
-    if (!goalId || !goalDescription || valueSupervisor == null || valuePeerGroup == null || !year) {
-        return res.status(400).json({ error: 'All fields required' });
-    }
-    if (!salesmen.some(s => s.sid === goalId)) {
-        return res.status(400).json({ error: 'Salesman with this goalId not found' });
-    }
+router.post('/', async (req, res) => {
+    try {
+        const { goalId, goalDescription, valueSupervisor, valuePeerGroup, year } = req.body;
 
-    const newRecord = {
-        goalId: Number(goalId),
-        goalDescription,
-        valueSupervisor: Number(valueSupervisor),
-        valuePeerGroup: Number(valuePeerGroup),
-        year: Number(year)
-    };
-    records.push(newRecord);
-    res.status(201).json(newRecord);
+        if (!goalId || !goalDescription || !valueSupervisor || !valuePeerGroup || !year) {
+            return res.status(400).json({ error: 'All fields required' });
+        }
+
+        const salesman = await getSalesmenCollection().findOne({ sid: parseInt(goalId) });
+        if (!salesman) {
+            return res.status(400).json({ error: 'Salesman with this goalId not found' });
+        }
+
+        const newRecord = {
+            goalId: parseInt(goalId),
+            goalDescription,
+            valueSupervisor: parseFloat(valueSupervisor),
+            valuePeerGroup: parseFloat(valuePeerGroup),
+            year: parseInt(year)
+        };
+
+        await getCollection().insertOne(newRecord);
+        res.status(201).json(newRecord);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // GET /api/performance/salesman/:sid → readSocialPerformanceRecord(salesMan)
-router.get('/salesman/:sid', (req, res) => {
-    const sid = parseInt(req.params.sid);
-    const filtered = records.filter(r => r.goalId === sid);
-    res.json(filtered);
+router.get('/salesman/:sid', async (req, res) => {
+    try {
+        const sid = parseInt(req.params.sid);
+        const records = await getCollection()
+            .find({ goalId: sid })
+            .project({ _id: 0 })
+            .toArray();
+        res.json(records);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// GET /api/performance/salesman/:sid/year/:year → readSocialPerformanceRecord(salesMan, year)
-router.get('/salesman/:sid/year/:year', (req, res) => {
-    const sid = parseInt(req.params.sid);
-    const year = parseInt(req.params.year);
-    const filtered = records.filter(r => r.goalId === sid && r.year === year);
-    res.json(filtered);
+// GET /api/performance/salesman/:sid/year/:year
+router.get('/salesman/:sid/year/:year', async (req, res) => {
+    try {
+        const sid = parseInt(req.params.sid);
+        const year = parseInt(req.params.year);
+
+        // Використовуємо фільтр AND (goalId + year)
+        const records = await getCollection()
+            .find({ goalId: sid, year: year })
+            .project({ _id: 0 })
+            .toArray();
+
+        res.json(records);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // PUT /api/performance → updateSalesmanSocialPerformanceRecord
-router.put('/', (req, res) => {
-    const { sid, description, newValueSupervisor, newValuePeerGroup } = req.body;
-    if (!sid || !description || newValueSupervisor == null || newValuePeerGroup == null) {
-        return res.status(400).json({ error: 'All fields required' });
+router.put('/', async (req, res) => {
+    try {
+        const { sid, description, newValueSupervisor, newValuePeerGroup } = req.body;
+
+        if (!sid || !description || newValueSupervisor == null || newValuePeerGroup == null) {
+            return res.status(400).json({ error: 'All fields required' });
+        }
+
+        const filter = {
+            goalId: parseInt(sid),
+            goalDescription: description
+        };
+
+        const update = {
+            $set: {
+                valueSupervisor: parseFloat(newValueSupervisor),
+                valuePeerGroup: parseFloat(newValuePeerGroup)
+            }
+        };
+
+        const result = await getCollection().updateOne(filter, update);
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'Record not found' });
+        }
+
+        // Повертаємо оновлений документ
+        const updatedRecord = await getCollection().findOne(filter, { projection: { _id: 0 } });
+        res.json(updatedRecord);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    const record = records.find(r => r.goalId === sid && r.goalDescription === description);
-    if (!record) return res.status(404).json({ error: 'Record not found' });
-
-    record.valueSupervisor = newValueSupervisor;
-    record.valuePeerGroup = newValuePeerGroup;
-    res.json(record);
 });
 
 // DELETE /api/performance → deleteSalesManSocialPerformanceRecord
-router.delete('/', (req, res) => {
-    const { sid, description } = req.body;
-    if (!sid || !description) return res.status(400).json({ error: 'sid and description required' });
+router.delete('/', async (req, res) => {
+    try {
+        const { sid, description } = req.body;
+        if (!sid || !description) return res.status(400).json({ error: 'sid and description required' });
 
-    const index = records.findIndex(r => r.goalId === sid && r.goalDescription === description);
-    if (index === -1) return res.status(404).json({ error: 'Record not found' });
+        const result = await getCollection().deleteOne({
+            goalId: parseInt(sid),
+            goalDescription: description
+        });
 
-    records.splice(index, 1);
-    res.status(204).send();
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'Record not found' });
+        }
+
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;
