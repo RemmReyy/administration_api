@@ -7,9 +7,16 @@ var { connect } = require('./data/db');
 
 const salesmenRouter = require('./routes/salesmen');
 const performanceRouter = require('./routes/performance');
+const orangeHrm = require('./routes/orangeHrm');
+const openCrxRouter = require('./routes/openCrx');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json')
 
 var app = express();
-connect();
+//Uncomment to enable MongoDB connection
+//connect();
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -23,6 +30,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/salesmen', salesmenRouter);
 app.use('/api/performance', performanceRouter);
+app.use('/api/orange', orangeHrm);
+app.use('/api/open', openCrxRouter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get('/', (req, res) => {
     res.send(`
