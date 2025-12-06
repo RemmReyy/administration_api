@@ -1,0 +1,354 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Salesman Integration API",
+    "description": "API for managing salesmen, performance records, and bonuses by integrating OrangeHRM and OpenCRX.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001/api",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/open/salesmen": {
+      "get": {
+        "summary": "Get all salesmen",
+        "description": "Retrieves a merged list of salesmen from OrangeHRM and OpenCRX.",
+        "responses": {
+          "200": {
+            "description": "A list of salesmen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Salesman" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open/salesmen/{id}": {
+      "get": {
+        "summary": "Get a specific salesman",
+        "description": "Retrieves detailed information for a specific salesman by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Salesman details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SalesmanDetail" }
+              }
+            }
+          },
+          "404": { "description": "Salesman not found" }
+        }
+      }
+    },
+    "/open/performance/{year}": {
+      "get": {
+        "summary": "Get performance for a specific year",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Performance metrics for all salesmen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Performance" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open/performance/{year}/{id}": {
+      "get": {
+        "summary": "Get performance for a specific salesman",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Performance metrics for the specified salesman",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Performance" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open/companies": {
+      "get": {
+        "summary": "Get all client companies",
+        "description": "Retrieves a list of accounts from OpenCRX that are identified as companies (not individuals).",
+        "responses": {
+          "200": {
+            "description": "List of companies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Company" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open/products": {
+      "get": {
+        "summary": "Get all products",
+        "description": "Retrieves the full product catalog from OpenCRX.",
+        "responses": {
+          "200": {
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Product" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open/orders": {
+      "get": {
+        "summary": "Get all sales orders",
+        "description": "Retrieves all sales orders available in the OpenCRX system.",
+        "responses": {
+          "200": {
+            "description": "List of sales orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Order" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open/orders/salesmen/{sid}": {
+      "get": {
+        "summary": "Get orders for a specific salesman",
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the salesman (Sales Representative)",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sales orders for the specified salesman",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Order" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orange/employees/{id}": {
+      "get": {
+        "summary": "Get raw employee data",
+        "description": "Retrieves direct employee data from OrangeHRM.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employee details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EmployeeRaw" }
+              }
+            }
+          },
+          "404": { "description": "Employee not found" }
+        }
+      }
+    },
+    "/orange/employees/{id}/bonus": {
+      "post": {
+        "summary": "Add bonus salary",
+        "description": "Adds a bonus entry to the salesman's record in OrangeHRM.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": { "type": "integer", "example": 2022 },
+                  "value": { "type": "number", "example": 5000 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bonus added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Salesman": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "orangeHrmId": { "type": "string" },
+          "openCrxId": { "type": "string" },
+          "fullName": { "type": "string" },
+          "department": { "type": "string" },
+          "jobTitle": { "type": "string" }
+        }
+      },
+      "SalesmanDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Salesman" },
+          {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string" },
+              "phone": { "type": "string" }
+            }
+          }
+        ]
+      },
+      "Performance": {
+        "type": "object",
+        "properties": {
+          "salesmanId": { "type": "string" },
+          "year": { "type": "integer" },
+          "totalRevenue": { "type": "number" },
+          "servedClients": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "Company": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "companyName": { "type": "string" },
+          "fullAddress": { "type": "string" },
+          "rating": { "type": "string" },
+          "industry": { "type": "integer" }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "productNumber": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number" },
+          "active": { "type": "boolean" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "orderNumber": { "type": "string" },
+          "name": { "type": "string" },
+          "amount": { "type": "number" },
+          "currency": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "salesRepId": { "type": "string" },
+          "customerId": { "type": "string" },
+          "status": { "type": "integer" }
+        }
+      },
+      "EmployeeRaw": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "fullName": { "type": "string" },
+          "jobTitle": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" }
+        }
+      }
+    }
+  }
+}
