@@ -11,6 +11,7 @@ const orangeHrm = require('./routes/orangeHrm');
 const openCrxRouter = require('./routes/openCrx');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json')
+const cors = require('cors');
 
 var app = express();
 //Uncomment to enable MongoDB connection
@@ -25,6 +26,10 @@ app.set('view engine', 'pug');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors({
+    origin: 'http://localhost:4200',
+    credentials: true
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
