@@ -1,0 +1,116 @@
+<div class="performance-page space-y-4">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-semibold text-slate-900">Performance</h1>
+      <p class="text-sm text-slate-600">CRUD for SocialPerformanceRecord</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+    <div class="lg:col-span-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+      <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+        <div class="font-medium">Records</div>
+        <div class="text-sm text-slate-500" *ngIf="loading()">Loading...</div>
+      </div>
+      <div class="divide-y divide-slate-100">
+        <div *ngFor="let r of records()" class="px-4 py-3">
+          <div class="flex items-center justify-between">
+            <div class="font-medium text-slate-900">{{ r.goalDescription }}</div>
+            <div class="text-sm text-slate-500">{{ r.year }}</div>
+          </div>
+          <div class="text-sm text-slate-600">SID: {{ r.goalId }}</div>
+          <div class="mt-1 text-sm text-slate-600">Supervisor: {{ r.valueSupervisor }} · Peer: {{ r.valuePeerGroup }}</div>
+        </div>
+        <div *ngIf="!records().length" class="px-4 py-6 text-sm text-slate-500">No data</div>
+      </div>
+    </div>
+
+    <div class="space-y-3 side-panel">
+      <div class="flex flex-col gap-2 items-stretch">
+        <div class="space-y-2">
+          <button class="btn primary w-full" (click)="toggleCreate()">Create</button>
+          <div *ngIf="activePanel() === 'create'" class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Create</div>
+                <div class="card-hint">Add a new performance record</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="createForm" class="space-y-4 styled-form" (ngSubmit)="create()">
+                <label class="field-label" for="goalId">Goal ID</label>
+                <input id="goalId" class="text-input" type="number" formControlName="goalId" />
+
+                <label class="field-label" for="goalDescription">Goal Description</label>
+                <input id="goalDescription" class="text-input" type="text" formControlName="goalDescription" />
+
+                <label class="field-label" for="valueSupervisor">Value Supervisor</label>
+                <input id="valueSupervisor" class="text-input" type="number" step="0.1" formControlName="valueSupervisor" />
+
+                <label class="field-label" for="valuePeerGroup">Value Peer Group</label>
+                <input id="valuePeerGroup" class="text-input" type="number" step="0.1" formControlName="valuePeerGroup" />
+
+                <label class="field-label" for="year">Year</label>
+                <input id="year" class="text-input" type="number" formControlName="year" />
+
+                <button mat-raised-button color="primary" class="w-full" type="submit" [disabled]="createForm.invalid">Create</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <button class="btn secondary w-full" (click)="toggleUpdate()">Update</button>
+          <div *ngIf="activePanel() === 'update'" class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Update</div>
+                <div class="card-hint">Adjust supervisor/peer scores</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="updateForm" class="space-y-4 styled-form" (ngSubmit)="update()">
+                <label class="field-label" for="sid">SID</label>
+                <input id="sid" class="text-input" type="number" formControlName="sid" />
+
+                <label class="field-label" for="description">Description</label>
+                <input id="description" class="text-input" type="text" formControlName="description" />
+
+                <label class="field-label" for="newValueSupervisor">New Value Supervisor</label>
+                <input id="newValueSupervisor" class="text-input" type="number" step="0.1" formControlName="newValueSupervisor" />
+
+                <label class="field-label" for="newValuePeerGroup">New Value Peer Group</label>
+                <input id="newValuePeerGroup" class="text-input" type="number" step="0.1" formControlName="newValuePeerGroup" />
+
+                <button mat-raised-button color="accent" class="w-full" type="submit" [disabled]="updateForm.invalid">Update</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <button class="btn ghost w-full" (click)="toggleDelete()">Delete</button>
+          <div *ngIf="activePanel() === 'delete'" class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Delete</div>
+                <div class="card-hint">Remove a performance record</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="deleteForm" class="space-y-4 styled-form" (ngSubmit)="remove()">
+                <label class="field-label" for="sid-delete">SID</label>
+                <input id="sid-delete" class="text-input" type="number" formControlName="sid" />
+
+                <label class="field-label" for="description-delete">Description</label>
+                <input id="description-delete" class="text-input" type="text" formControlName="description" />
+
+                <button mat-stroked-button color="warn" class="w-full" type="submit" [disabled]="deleteForm.invalid">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

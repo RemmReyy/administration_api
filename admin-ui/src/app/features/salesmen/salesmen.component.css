@@ -1,0 +1,97 @@
+.card {
+  @apply bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-5;
+}
+
+.card-header {
+  @apply px-5 py-4 flex items-center justify-between border-b border-slate-200 bg-slate-50;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-colors;
+}
+
+.btn.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 shadow-sm;
+}
+
+.btn.ghost {
+  @apply text-slate-700 bg-slate-100 hover:bg-slate-200;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+:host {
+  display: block;
+}
+
+/* Custom style for inputs in Create card */
+:host ::ng-deep .create-form .mat-mdc-form-field-infix {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+:host ::ng-deep .create-form .mat-mdc-text-field-wrapper {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+:host ::ng-deep .create-form .mat-mdc-text-field-wrapper:hover {
+  border-color: #cbd5e1;
+}
+
+:host ::ng-deep .create-form .mat-mdc-text-field-wrapper.mat-focused {
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  border-color: #3b82f6;
+}
+
+/* Dark theme input styling */
+:host ::ng-deep .create-form .mat-mdc-text-field-wrapper,
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: #0f172a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+:host ::ng-deep .create-form .mat-mdc-text-field-wrapper:hover,
+:host ::ng-deep .mat-mdc-text-field-wrapper:hover {
+  border-color: #7c3aed;
+  background: #121d36;
+}
+
+:host ::ng-deep .create-form .mat-mdc-text-field-wrapper.mat-focused,
+:host ::ng-deep .mat-mdc-text-field-wrapper.mat-focused {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.25);
+  background: #0f172a;
+}
+
+:host ::ng-deep .create-form .mat-mdc-form-field-focus-overlay,
+:host ::ng-deep .mat-mdc-form-field-focus-overlay {
+  background: transparent;
+}
+
+:host ::ng-deep .create-form .mat-mdc-floating-label,
+:host ::ng-deep .mat-mdc-floating-label {
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+:host ::ng-deep .create-form .mat-mdc-input-element,
+:host ::ng-deep .mat-mdc-input-element {
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+:host ::ng-deep .create-form .mdc-notched-outline__leading,
+:host ::ng-deep .create-form .mdc-notched-outline__trailing,
+:host ::ng-deep .create-form .mdc-notched-outline__notch,
+:host ::ng-deep .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-notched-outline__trailing,
+:host ::ng-deep .mdc-notched-outline__notch {
+  border-color: transparent;
+}
