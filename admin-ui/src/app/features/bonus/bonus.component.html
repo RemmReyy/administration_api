@@ -1,0 +1,29 @@
+<div class="bonus-page">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">HR Bonus</div>
+        <div class="card-sub">POST /api/orange/employees/:id/bonus</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="form" class="space-y-4" (ngSubmit)="submit()">
+        <label class="field-label" for="employeeId">Employee ID</label>
+        <input id="employeeId" class="text-input" type="text" formControlName="employeeId" />
+
+        <label class="field-label" for="year">Year</label>
+        <input id="year" class="text-input" type="number" formControlName="year" />
+
+        <label class="field-label" for="value">Value</label>
+        <input id="value" class="text-input" type="number" formControlName="value" />
+
+        <button mat-raised-button color="primary" class="w-full" type="submit" [disabled]="form.invalid || loading()">Send</button>
+      </form>
+
+      <div class="status" *ngIf="success() === true">Bonus added (mock)</div>
+      <div class="status error" *ngIf="success() === false">Failed to add bonus</div>
+      <div class="status info" *ngIf="loading()">Sending...</div>
+      <div class="status error" *ngIf="error()">{{ error() }}</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,86 @@
+<div class="space-y-3">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+    <div>
+      <h1 class="text-xl font-semibold text-slate-900">Dashboard</h1>
+      <p class="text-sm text-slate-600">OpenCRX: sales, products, companies (mock data enabled)</p>
+    </div>
+    <div class="flex items-center gap-2 text-xs text-slate-500">
+      <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-medium">{{ year() }}</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
+      <div class="text-xs text-slate-500">Revenue, $</div>
+      <div class="text-xl font-semibold text-slate-900">{{ totalRevenue() | number:'1.0-0' }}</div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
+      <div class="text-xs text-slate-500">Orders</div>
+      <div class="text-xl font-semibold text-slate-900">{{ ordersCount() }}</div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
+      <div class="text-xs text-slate-500">Products</div>
+      <div class="text-xl font-semibold text-slate-900">{{ productsCount() }}</div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
+      <div class="text-xs text-slate-500">Companies</div>
+      <div class="text-xl font-semibold text-slate-900">{{ companiesCount() }}</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+    <div class="lg:col-span-3 bg-white border border-slate-200 rounded-xl shadow-sm p-3">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <div class="font-semibold text-slate-900 text-sm">Revenue by salesRep</div>
+          <div class="text-xs text-slate-500">Bar chart, data {{ year() }}</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas baseChart [data]="barData()" [options]="barOptions" chartType="bar"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-3">
+      <div class="font-semibold text-slate-900 mb-2 text-sm">Orders</div>
+      <div class="divide-y divide-slate-100">
+        <div *ngFor="let o of orders()" class="py-2">
+          <div class="flex items-center justify-between text-sm font-medium text-slate-900">
+            {{ o.orderNumber }}
+            <span class="text-slate-500 text-xs">{{ o.currency }}</span>
+          </div>
+          <div class="text-xs text-slate-500">{{ o.name }}</div>
+          <div class="text-sm text-slate-600">{{ o.amount | number:'1.0-0' }}</div>
+        </div>
+        <div *ngIf="!orders().length" class="py-2 text-sm text-slate-500">No orders</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-3">
+      <div class="font-semibold text-slate-900 mb-2 text-sm">Products</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div *ngFor="let p of products()" class="border border-slate-100 rounded-lg p-3 bg-slate-50/60">
+          <div class="font-medium text-slate-900 text-sm">{{ p.name }}</div>
+          <div class="text-xs text-slate-500">{{ p.productNumber }}</div>
+          <div class="text-sm text-slate-700">{{ p.price | currency:'USD' }}</div>
+        </div>
+        <div *ngIf="!products().length" class="text-sm text-slate-500">No products</div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-3">
+      <div class="font-semibold text-slate-900 mb-2 text-sm">Companies</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div *ngFor="let c of companies()" class="border border-slate-100 rounded-lg p-3 bg-white">
+          <div class="font-medium text-slate-900 text-sm">{{ c.companyName }}</div>
+          <div class="text-xs text-slate-500">{{ c.industry || '—' }}</div>
+          <div class="text-sm text-slate-700">{{ c.rating || '—' }}</div>
+        </div>
+        <div *ngIf="!companies().length" class="text-sm text-slate-500">No companies</div>
+      </div>
+    </div>
+  </div>
+</div>
+
